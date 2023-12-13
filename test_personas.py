@@ -20,6 +20,7 @@ for dataset in os.listdir(pathlib.Path(DATA_DIR, "dev")):
         dev_data[dataset] = f.readlines()
 
 random_dataset_name = random.choice(list(dev_data.keys()))
+# random_dataset_name = "world_religions_dev.csv"
 random_dataset = dev_data[random_dataset_name]
 
 print(random_dataset_name)
@@ -57,10 +58,10 @@ for line in random_dataset:
 
 ## now we do an experiment. We will ask the model to answer the question, and then we will see if the answer is correct, and track it's response. We'll also track the seed parameter we use.
 
-
+results = open(random_dataset_name + "_results.txt","a")
 
 client = openai.Client()
-assistant_id = "asst_RT6Q2VElMQwGvryRilQAZBo2"
+assistant_id = "asst_Idiktn0HgS8a1sJ3qbP4n4Oy"
 assistant = client.beta.assistants.retrieve(assistant_id)
 
 print(random_dataset_name)
@@ -92,7 +93,7 @@ for item_index in range(len(items)):
     run = client.beta.threads.runs.create(
         thread_id=thread.id,
         assistant_id=assistant.id,
-        instructions="Please only answer A, B, C, or D with no other text.",
+        instructions="Please only answer A, B, C, or D with no other text, each answer will be given on a different line, or use True or False if there are no answers.",
     )
 
     while run.status != "completed":
@@ -111,6 +112,9 @@ for item_index in range(len(items)):
     print("CORRECT ANSWER:",items[item_index]["correct_answer"])
     if answer == items[item_index]["correct_answer"]:
         correct += 1
+    results.write(items[item_index]["question"] + "," + answer + "," + items[item_index]["correct_answer"] + "\n")
+    
+results.close()
         
 print("ACCURACY:", correct/count)
 print("COUNT:", count)
